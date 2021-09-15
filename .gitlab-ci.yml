@@ -1,0 +1,10 @@
+stages:
+- deploy
+deploy:
+  stage: deploy
+  script:
+    - /home/www/deploy_sh/game_config.sh 318game 318_game_config
+  only:
+    - dev
+  tags:
+    - shell
