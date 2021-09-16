@@ -40,12 +40,13 @@ class OrderController extends Controller
     public function incomeStatInfo(Request $request) {
         $channelInfo = $request->get('channelInfo');
         $channelInfo = Channel::getInfoById($channelInfo->id);
-        $channelMemberCount = Member::getChannelMemberCount($channelInfo->id);
-        $channelAccountInfo = ChannelAccount::getInfoByChannelId($channelInfo->id);
-        $historyIncome = $channelAccountInfo ?-> total_income;
-        $balance = $channelAccountInfo ?-> balance;
-        $historyWithdraw = $channelAccountInfo ?-> total_withdraw;
-        $freezeWithdraw = MemberWithdrawRecord::getFreezeWithdrawByChannelId($channelInfo->id);
+        $channelMemberCount = Member::getChannelMemberCount($channelInfo->id);      //发展用户
+        //$channelAccountInfo = ChannelAccount::getInfoByChannelId($channelInfo->id);
+        //$historyIncome = $channelAccountInfo ?-> total_income;
+        $historyIncome = $channelInfo?->total_income;      //累计收益
+        $balance = $channelInfo?->balance;                 //余额
+        $historyWithdraw = $channelInfo?->total_withdraw;  //已提现
+        $freezeWithdraw = MemberWithdrawRecord::getFreezeWithdrawByChannelId($channelInfo->id); //待提现
         $withdrawFeeRate = SystemConfig::GetVal("system.channel_withdraw.fee_rate") ?: 0.07;
 
         return $this->successJson([
@@ -57,7 +58,8 @@ class OrderController extends Controller
             'withdrawLimit' => MemberWithdrawRecord::CHANNEL_WITHDRAW_LIMIT,
             'withdrawFeeRate' => $withdrawFeeRate,
             'withdrawFeeRatePercent' => $withdrawFeeRate * 100 . '%',
-            'loanAccountInfo' => $channelInfo->loan_account_info ? json_decode($channelInfo->loan_account_info, true) : []
+            //'loanAccountInfo' => $channelInfo->loan_account_info ? json_decode($channelInfo->loan_account_info, true) : []
+            'loanAccountInfo' => ['phone'=>$channelInfo?->phone,'bankName'=>$channelInfo?->bank,'contactName'=>$channelInfo?->contact,'bankAccount'=>$channelInfo?->account]
         ]);
     }
 
@@ -69,10 +71,14 @@ class OrderController extends Controller
         $channelId = $channelInfo->id;
         $channelInfo = Channel::getInfoById($channelInfo->id);
         $money = $request->input('money');
-        if ($money > MemberWithdrawRecord::CHANNEL_WITHDRAW_LIMIT) {
-            return $this->errorJson('请输入正确的提现金额');
+        if ($money < MemberWithdrawRecord::CHANNEL_WITHDRAW_LIMIT) {
+            return $this->errorJson("提现金额必须大于".MemberWithdrawRecord::CHANNEL_WITHDRAW_LIMIT);
         }
-        MemberWithdrawRecord::applyWithdraw($channelId, $money, $channelInfo->loan_account_info);
+        //MemberWithdrawRecord::applyWithdraw($channelId, $money, $channelInfo->loan_account_info);
+        $loan_account_info = ['type'=>$channelInfo?->withdraw_type,'phone'=>$channelInfo?->phone,'bankName'=>$channelInfo?->bank,'contactName'=>$channelInfo?->contact,'bankAccount'=>$channelInfo?->account];
+
+        MemberWithdrawRecord::applyWithdraw($channelId, $money, json_encode($loan_account_info));
+
         return $this->successJson(['message' => '提现申请成功']);
     }
 

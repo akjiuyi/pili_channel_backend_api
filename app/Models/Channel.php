@@ -10,7 +10,8 @@ class Channel extends Model
     protected $dateFormat = 'U';
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
-    const TOKEN_EXPIRED = 3600;
+    //const TOKEN_EXPIRED = 3600;
+    const TOKEN_EXPIRED = 3600*24;
 
     public static function getInfoById($channelId) {
         return self::where('id', $channelId)->first();
@@ -75,5 +76,9 @@ class Channel extends Model
         }
 
         Cache::forget('token:' . $channelInfo->token);
+    }
+
+    public static function getInfoByChannelIdForLock($channelId) :? self{
+        return parent::where('id', $channelId)->lockForUpdate()->first();
     }
 }

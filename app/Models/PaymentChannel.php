@@ -15,7 +15,8 @@ class PaymentChannel extends Model
         parent::query()->whereIn('id', $ids)->get()->each(function($info) use (&$return){
             $return[$info->id] = [
                 'id' => $info->id,
-                'title' => $info->landslide_name,
+                //'title' => $info->landslide_name,
+                'title' => $info->merchant_name."-".$info->payment_name,
                 'desc' => $info->descs,
                 'originalPrice' => $info->original_price,
                 'discountPrice' => $info->discount_price
@@ -25,10 +26,10 @@ class PaymentChannel extends Model
     }
 
     public static function appProductLists() {
-        parent::query()->get()->each(function($info) use (&$return){
+        parent::query()->where('app_group','')->get()->each(function($info) use (&$return){
             $return[] = [
                 'id' => $info->id,
-                'landslideName' => $info->landslide_name,
+                'landslideName' => $info->merchant_name."-".$info->payment_name,
             ];
         });
         return $return;
