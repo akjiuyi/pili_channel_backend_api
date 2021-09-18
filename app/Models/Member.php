@@ -402,6 +402,7 @@ class Member extends Model
             }elseif($info->type == 2){
                 $order_info = "购买时间：{$info->create_time}/购买金币：{$info->title}";
             }else{
+                $info->trade_amount = '';
                 $order_info = "";
             }
 
