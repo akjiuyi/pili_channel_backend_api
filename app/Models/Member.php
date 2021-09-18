@@ -139,6 +139,7 @@ class Member extends Model
         $query = parent::query()
             ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId)
+            ->whereIn('order.type', [1,2])
             ->where('order.pay_state', 2);
 
 
