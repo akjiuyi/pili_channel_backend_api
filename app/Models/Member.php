@@ -42,7 +42,7 @@ class Member extends Model
         $endTime = strtotime(date('Y-m-d 23:59:59'),time());
 
         return self::query()
-            ->leftJoin('mzfk_dau_record as record', 'record.member_id', 'mzfk_member.id')
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId)
             ->where('record.create_time', '>=', $startTime)
             ->where('record.create_time', '<=', $endTime)
@@ -183,7 +183,7 @@ class Member extends Model
         if ($channelId <= 0) return 0;
 
         $query = parent::query()
-            ->leftJoin('mzfk_dau_record as record', 'record.member_id', 'mzfk_member.id')
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId);
 
         if ($dataOptionValue) {
@@ -463,20 +463,22 @@ class Member extends Model
 
             //vip状态
             $is_vip = '否';
+            $vip_expired = '';
             if($info->vip_level>1&&$info->vip_expired>time()){
                 $is_vip = '是';
+                $vip_expired = displayCreatedTime($info->vip_expired,'Y-m-d H:i:s');
             }
 
 
             //vip到期时间
-            $vip_expired = '';
+            /*$vip_expired = '';
             if($info->vip_level > 1){
                 $vip_expired = displayCreatedTime($info->vip_expired,'Y-m-d H:i:s');
-            }
+            }*/
 
             //最近访问
             $last_access = '';
-            $create_time = DB::table('mzfk_dau_record')
+            $create_time = DB::table('mzfk_member_event_log')
                 ->where('member_id', $info->id)
                 ->orderBy('id','desc')
                 ->value('create_time');
@@ -491,7 +493,7 @@ class Member extends Model
                 'nickname' => $info->nickname,
                 'state' => $is_vip,
                 'os' => match($info->register_os) { //1 安卓 2 苹果
-            'android' => '安卓',
+                    'android' => '安卓',
                     'ios' => '苹果',
                 },
                 'trade_amount' => $info->trade_amount,

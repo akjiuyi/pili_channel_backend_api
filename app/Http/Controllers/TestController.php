@@ -13,11 +13,11 @@ use App\Models\Member;
 use Illuminate\Http\Request;
 
 
-
-
 class TestController extends Controller
 {
     public function index(Request $request) {
+        echo date('Y-m-d H:i:s');die;
+
         $s = \Illuminate\Support\Facades\Cache::put('testexpire', 1111, 4);
 
         var_dump($s);echo PHP_EOL;
