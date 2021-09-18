@@ -20,11 +20,16 @@ $router->get('/', function () use ($router) {
 });
 
 $router->get('/test/index', ['uses' => 'TestController@index']);
+$router->get('/test/exportFirstPageStatistics', ['uses' => 'TestController@exportFirstPageStatistics']);
 $router->post('/auth/login', ['uses' => 'AuthController@login']);
 $router->post('/auth/logout', ['uses' => 'AuthController@logout']);
 
 $router->get('/user/info', ['uses' => 'UserController@info']);
 $router->post('/user/resetPwd', ['uses' => 'UserController@resetPwd']);
+$router->post('/user/channelUserLists', ['uses' => 'UserController@channelUserLists']);
+$router->post('/user/summaryInfo', ['uses' => 'UserController@summaryInfo']);
+$router->get('/user/exportFirstPageStatistics', ['uses' => 'UserController@exportFirstPageStatistics']);
+
 
 $router->post('/order/applyWithdraw', ['uses' => 'OrderController@applyWithdraw']);
 $router->get('/order/incomeStatInfo', ['uses' => 'OrderController@incomeStatInfo']);

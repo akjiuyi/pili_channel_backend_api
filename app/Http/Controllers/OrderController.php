@@ -30,7 +30,8 @@ class OrderController extends Controller
         $paymentChannelId = (int) $request->input('paymentChannelId');
 
 
-        $lists = ChannelBalanceLog::getIncomeLists($nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page, $pageSize);
+        $channelInfo = $request->get('channelInfo');
+        $lists = ChannelBalanceLog::getIncomeLists($channelInfo->id,$nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page, $pageSize);
 
 
         return $this->successJson($lists);

@@ -10,12 +10,13 @@ class ChannelBalanceLog extends Model
     const CREATED_AT = 'create_time';
     const UPDATED_AT = 'update_time';
 
-    public static function getIncomeLists($nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page = 1, $pageSize = 10) {
+    public static function getIncomeLists($channel_id, $nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page = 1, $pageSize = 10) {
         $query = parent::query()
             ->leftJoin('mzfk_member_order as order', 'order.id', 'mzfk_channel_balance_log.refer_id')
             //->leftJoin('mzfk_member_payment_record as payment_record', 'order.id', 'payment_record.order_id')
             ->leftJoin('mzfk_member as member', 'order.member_id', 'member.id')
             ->leftJoin('mzfk_app_product as product', 'order.product_id', 'product.id')
+            ->where([['mzfk_channel_balance_log.channel_id', $channel_id]])
             ->where([['mzfk_channel_balance_log.type', 1]]);
 
 
@@ -44,9 +45,7 @@ class ChannelBalanceLog extends Model
             $query->where('mzfk_channel_balance_log.create_time', '<=', $endTime);
         }
 
-        /*$lists = $query->selectRaw('mzfk_channel_balance_log.id,mzfk_channel_balance_log.change_balance,mzfk_channel_balance_log.create_time,
-            member.nickname,payment_record.otn,payment_record.payment_channel_id,payment_record.amount,payment_record.order_id,order.product_id,order.pay_state,order.member_id')
-            ->limit($pageSize)->offset(($page - 1) * $pageSize)->get();*/
+        $count = $query->count();
 
         $lists = $query->selectRaw('mzfk_channel_balance_log.id,mzfk_channel_balance_log.change_balance,mzfk_channel_balance_log.create_time,
             member.nickname,product.discount_price,order.order_no,order.channel_id,order.real_amount,order.id as order_id,order.product_id,order.pay_state,order.member_id')
@@ -91,7 +90,7 @@ class ChannelBalanceLog extends Model
         }
 
         return [
-            'total' => $query->count(),
+            'total' => $count,
             'items' => $data
         ];
     }
@@ -108,6 +107,7 @@ class ChannelBalanceLog extends Model
         $info->refer_id = $referId;
         $info->desc = $desc;
         $info->refer_member_id = 0;
+
         return $info->save() ? $info : null;
     }
 }

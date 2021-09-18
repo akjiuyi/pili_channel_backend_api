@@ -1,4 +1,10 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+
+
 if (!function_exists('config_path')) {
     function config_path()
     {
@@ -145,7 +151,7 @@ function displayCreatedTime($created_at, $format = null)
     } elseif ($t < $time + 60 * 60) {
         $dateStr = '30分钟前';
     } else {
-        $dateStr = date('Y-m-d H:i', $time);
+        $dateStr = date('Y-m-d H:i:s', $time);
     }
     return $dateStr;
 }
@@ -215,3 +221,85 @@ function randString($length = 12)
 {
     return substr(sha1(uniqid() . microtime()), 0, $length);
 }
+
+
+/**
+ * exportExcel($data,$title,$filename);
+ * 导出数据为excel表格
+ *@param $data    一个二维数组,结构如同从数据库查出来的数组
+ *@param $title   excel的第一行标题,一个数组,如果为空则没有标题
+ *@param $filename 下载的文件名
+ *@examlpe
+exportExcel($arr,array('id'=>'id','account'=>''账户','pwd'=>'密码','nickname'=>'昵称'),'文件名!');
+ */
+function exportExcelV2($data=array(),$header=array(),$filename='report',$title="导出表")
+{
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename=" ' . $filename . '.xls"'); //下载文件名字
+    header('Cache-Control: max-age=0');
+
+    $spreadsheet = new Spreadsheet();
+
+    $sheet = $spreadsheet->getActiveSheet();
+
+    $styleArray = [
+        'alignment' => [
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+        ],
+    ];
+
+    $sheet->getStyle('A:Z')->getFont()->setBold(true)->setName('宋体 (正文)')
+        ->setSize(15);
+
+    $sheet->getDefaultColumnDimension()->setWidth(20);
+    $sheet->getDefaultRowDimension()->setRowHeight(30);
+
+    $sheet->getStyle('A:Z')->applyFromArray($styleArray);
+
+    //设置标题
+    $sheet->setTitle($title);
+
+    $table_header = array("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z");
+
+    $title_key = [];
+    //导出xls开始
+    if (!empty($header))
+    {
+        $i = 0;
+        foreach ($header as $k => $v)
+        {
+            //$sheet->setCellValue($table_header[$i]."1", iconv("UTF-8", "gbk//ignore",$v));
+            $sheet->setCellValue($table_header[$i]."1", $v);
+            $title_key[] = $k;
+            $i++;
+        }
+    }
+
+    if (!empty($data))
+    {
+        $i = 0;
+        foreach($data as $key=>$val)
+        {
+            $j = 0;
+            foreach ($val as $ck => $cv)
+            {
+                if($j > (count($header)-1)){
+                    break;
+                }
+                $title_key_ = $title_key[$j];
+
+                //$sheet->setCellValue($table_header[$j].($i+2), iconv("UTF-8", "gbk//ignore", $val["{$title_key_}"]));
+                $sheet->setCellValue($table_header[$j].($i+2), $val["{$title_key_}"]);
+                $j++;
+            }
+            $i++;
+        }
+    }
+
+    $writer = new Xls($spreadsheet);
+    $writer->save('php://output');
+    die;
+}
+
+
+

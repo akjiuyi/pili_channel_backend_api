@@ -81,4 +81,5 @@ class Channel extends Model
     public static function getInfoByChannelIdForLock($channelId) :? self{
         return parent::where('id', $channelId)->lockForUpdate()->first();
     }
+
 }

@@ -24,7 +24,7 @@ class MemberWithdrawRecord extends Model
 
     public static function getFreezeWithdrawByChannelId($channelId) {
         if ($channelId <= 0) return 0;
-        return parent::query()->where('member_type', 2)->where('member_id', $channelId)->where('withdraw_state', 1)->sum('withdraw_amount');
+        return parent::query()->where('member_type', 2)->where('member_id', $channelId)->whereIn('withdraw_state', [1,2])->sum('withdraw_amount');
     }
 
     public static function applyWithdraw($channelId, $amount, $loanAccountInfo) :self{
