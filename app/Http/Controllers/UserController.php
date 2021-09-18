@@ -62,20 +62,21 @@ class UserController extends Controller
         $channelIosDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'ios',$dataOptionValue,$startDate,$endDate);          //苹果设备数
         $channelAndroidDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'android',$dataOptionValue,$startDate,$endDate);  //安卓设备数
         $res = Member::getChargeCountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);
-        $channelChargeCount = $res['charge_times'];  //充值次数
-        //$channelChargeMemberCount = $res['charge_member_count'];  //充值人数
+        //$channelChargeCount = $res['charge_times'];  //充值次数
+        $channelChargeMemberCount = $res['charge_member_count'];  //充值人数
         $channelChargeAmount = Member::getChargeAmountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);             //充值金额
 
         //$channeGeneralMemberCount = Member::getChannelGeneralMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);    //普通用户数
-        $channeVipMemberCount = Member::getChannelVipMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);              //Vip用户数
+        //$channeChargeMemberCount = Member::getChannelChargeMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);      //充值人数
+        $channeActiveMemberCount = Member::getChannelActiveMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);        //活跃人数
         $channelTotalMemberCount = Member::getChannelTotalMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);         //累计用户
 
         if($channelTotalMemberCount == 0){
             $channelChargeRate = 0;
             $channelAvgConsumption = 0;
         }else{
-            $channelChargeRate = $channeVipMemberCount/$channelTotalMemberCount;  //充值比例
-            $channelAvgConsumption = $channelChargeAmount/$channelTotalMemberCount;  //人均消费
+            $channelChargeRate = $channelChargeMemberCount/$channeActiveMemberCount;  //充值比例
+            $channelAvgConsumption = $channelChargeAmount/$channeActiveMemberCount;  //人均消费
         }
 
         return $this->successJson([
@@ -84,7 +85,7 @@ class UserController extends Controller
             'channelTodayActiveMemberCount' => $channelTodayActiveMemberCount,
             'channelIosDeviceCount' => $channelIosDeviceCount,
             'channelAndroidDeviceCount' => $channelAndroidDeviceCount,
-            'channelChargeCount' => $channelChargeCount,
+            'channelChargeCount' => $channelChargeMemberCount,
             'channelChargeAmount' => $channelChargeAmount,
             'channelChargeRate' => sprintf("%.2f",$channelChargeRate*100)."%",
             'channelAvgConsumption' => sprintf("%.2f",$channelAvgConsumption),

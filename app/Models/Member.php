@@ -128,7 +128,11 @@ class Member extends Model
             $query->where('mzfk_member.create_time', '<=', $endTime);
         }
 
-        return ['charge_times'=>$query->count(),'charge_member_count'=>$query->groupBy('mzfk_member.id')->count()];
+        $charge_member_count = $query->select('mzfk_member.id')
+                                     ->distinct()
+                                     ->count('mzfk_member.id');
+
+        return ['charge_times'=>$query->count(),'charge_member_count'=>$charge_member_count];
     }
 
 
@@ -171,6 +175,55 @@ class Member extends Model
 
         //return $query->count();
         return $query->sum('trade_amount');
+    }
+
+
+    //渠道活跃人数
+    public static function getChannelActiveMemberCount($channelId,$dataOptionValue,$startDate,$endDate) {
+        if ($channelId <= 0) return 0;
+
+        $query = parent::query()
+            ->leftJoin('mzfk_dau_record as record', 'record.member_id', 'mzfk_member.id')
+            ->where('mzfk_member.channel_id', $channelId);
+
+        if ($dataOptionValue) {
+            if($dataOptionValue == 1){   //今天
+                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
+                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+
+                $query->where('mzfk_member.create_time', '>=', $startTime);
+                $query->where('mzfk_member.create_time', '<=', $endTime);
+            }else if($dataOptionValue == 2){  //昨天
+                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
+                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+
+                $query->where('mzfk_member.create_time', '>=', $startTime);
+                $query->where('mzfk_member.create_time', '<=', $endTime);
+            }
+        }
+
+        if($startDate){
+            $startTime = strtotime($startDate." 00:00:00");
+            $query->where('mzfk_member.create_time', '>=', $startTime);
+        }
+
+        if($endDate){
+            $endTime = strtotime($endDate." 23:59:59");
+            $query->where('mzfk_member.create_time', '<=', $endTime);
+        }
+
+        if($dataOptionValue||$startDate||$endDate){
+            $active_member_count = $query->select('record.member_id')
+                ->distinct()
+                ->count('record.member_id');
+        }else{
+            $active_member_count = parent::query()
+                ->where('mzfk_member.channel_id', $channelId)
+                ->count();
+        }
+
+
+        return $active_member_count;
     }
 
 
@@ -379,6 +432,7 @@ class Member extends Model
                     $res = DB::table('mzfk_member_order')
                         ->leftJoin('mzfk_app_product as product', 'product.id', 'mzfk_member_order.product_id')
                         ->where('mzfk_member_order.member_id', $user->id)
+                        ->orderBy('mzfk_member_order.id','desc')
                         ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.create_time')
                         ->first();
 
@@ -407,18 +461,35 @@ class Member extends Model
                 $order_info = "";
             }
 
+            //vip状态
+            $is_vip = '否';
+            if($info->vip_level>1&&$info->vip_expired>time()){
+                $is_vip = '是';
+            }
+
+
+            //vip到期时间
             $vip_expired = '';
             if($info->vip_level > 1){
                 $vip_expired = displayCreatedTime($info->vip_expired,'Y-m-d H:i:s');
             }
 
+            //最近访问
+            $last_access = '';
+            $create_time = DB::table('mzfk_dau_record')
+                ->where('member_id', $info->id)
+                ->orderBy('id','desc')
+                ->value('create_time');
+
+            if($create_time){
+                $last_access = displayCreatedTime($create_time,'Y-m-d H:i:s');
+            }
+
+
             $data[] = [
                 'id' => $info->id,
                 'nickname' => $info->nickname,
-                'state' => match($info->state) { //1 正常 2 封禁
-                1 => '正常',
-                    2 => '封禁',
-                },
+                'state' => $is_vip,
                 'os' => match($info->register_os) { //1 安卓 2 苹果
             'android' => '安卓',
                     'ios' => '苹果',
@@ -426,7 +497,8 @@ class Member extends Model
                 'trade_amount' => $info->trade_amount,
                 'order_info' => $order_info,
                 'create_time' => displayCreatedTime($info->m_create_time,'Y-m-d H:i:s'),
-                'vip_expired' => $vip_expired
+                'vip_expired' => $vip_expired,
+                'last_access' => $last_access
              ];
         }
 
