@@ -67,14 +67,11 @@ class UserController extends Controller
         $channelChargeAmount = Member::getChargeAmountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);             //充值金额
 
 
-        //$channeGeneralMemberCount = Member::getChannelGeneralMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);    //普通用户数
-        //$channeChargeMemberCount = Member::getChannelChargeMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);      //充值人数
         $channeActiveMemberCount = Member::getChannelActiveMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);        //活跃人数
-        $channelTotalMemberCount = Member::getChannelTotalMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);         //累计用户
+        //$channelTotalMemberCount = Member::getChannelTotalMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);         //累计用户
 
-        if($channelTotalMemberCount == 0){
+        if($channeActiveMemberCount == 0){
             $channelChargeRate = 0;
-            $channelAvgConsumption = 0;
         }else{
             $channelChargeRate = $channelChargeMemberCount/$channeActiveMemberCount;  //充值比例
 
