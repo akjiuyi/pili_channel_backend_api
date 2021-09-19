@@ -431,7 +431,7 @@ class Member extends Model
         $count = $query->count();
 
         $lists = [];
-        $query->selectRaw('mzfk_member.id,mzfk_member.nickname,mzfk_member.create_time as m_create_time,mzfk_member.vip_level,mzfk_member.vip_expired,account.register_os,mzfk_member.state')
+        /*$query->selectRaw('mzfk_member.id,mzfk_member.nickname,mzfk_member.create_time as m_create_time,mzfk_member.vip_level,mzfk_member.vip_expired,account.register_os,mzfk_member.state')
             ->limit($pageSize)->offset(($page - 1) * $pageSize)->chunk(100, function ($users) use(&$lists){
                 foreach ($users as $user) {
                     $res = DB::table('mzfk_member_order')
@@ -453,7 +453,33 @@ class Member extends Model
 
                     $lists[] = $user;
                 }
-            });
+            });*/
+
+        $member_lists = $query->selectRaw('mzfk_member.id,mzfk_member.nickname,mzfk_member.create_time as m_create_time,mzfk_member.vip_level,mzfk_member.vip_expired,account.register_os,mzfk_member.state')
+            ->limit($pageSize)->offset(($page - 1) * $pageSize)->get();
+
+
+        foreach ($member_lists as $member) {
+            $res = DB::table('mzfk_member_order')
+                ->leftJoin('mzfk_app_product as product', 'product.id', 'mzfk_member_order.product_id')
+                ->where('mzfk_member_order.member_id', $member->id)
+                ->orderBy('mzfk_member_order.id','desc')
+                ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.create_time')
+                ->first();
+
+
+            if($res){
+                $member->trade_amount = $res->trade_amount;
+                $member->order_no = $res->order_no;
+                $member->type = $res->type;
+                $member->real_amount = $res->real_amount;
+                $member->title = $res->title;
+                $member->create_time = $res->create_time;
+            }
+
+            $lists[] = $member;
+        }
+
 
         $data = [];
         foreach($lists as $info) {
