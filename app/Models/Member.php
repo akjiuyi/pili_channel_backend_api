@@ -103,8 +103,9 @@ class Member extends Model
 
         $query = parent::query()
             ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
-            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
+            //->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId)
+            ->whereIn('order.type', [1,2])
             ->where('order.pay_state', 2);
 
 
@@ -113,25 +114,25 @@ class Member extends Model
                 $startTime = strtotime(date('Y-m-d 00:00:00',time()));
                 $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('record.create_time', '>=', $startTime);
-                $query->where('record.create_time', '<=', $endTime);
+                $query->where('order.update_time', '>=', $startTime);
+                $query->where('order.update_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
                 $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
                 $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('record.create_time', '>=', $startTime);
-                $query->where('record.create_time', '<=', $endTime);
+                $query->where('order.update_time', '>=', $startTime);
+                $query->where('order.update_time', '<=', $endTime);
             }
         }
 
         if($startDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('record.create_time', '>=', $startTime);
+            $query->where('order.update_time', '>=', $startTime);
         }
 
         if($endDate){
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('record.create_time', '<=', $endTime);
+            $query->where('order.update_time', '<=', $endTime);
         }
 
         $charge_member_count = $query->select('mzfk_member.id')
@@ -185,12 +186,14 @@ class Member extends Model
         }
 
 
-        /*$charge_amount =  $query->sum('trade_amount');
-        $charge_member_count =  $query->select('mzfk_member.id')
-                                ->distinct()
-                                ->count('mzfk_member.id');*/
+        /*$charge_amount =  $query->sum('trade_amount');*/
+        /*$charge_member_count =  $query->select('order.id')
+                                ->distinct('order.id')
+                                ->sum('trade_amount');*/
 
         return $query->sum('trade_amount');
+
+        //return $query->sum('trade_amount');
     }
 
 
@@ -464,6 +467,8 @@ class Member extends Model
             $res = DB::table('mzfk_member_order')
                 ->leftJoin('mzfk_app_product as product', 'product.id', 'mzfk_member_order.product_id')
                 ->where('mzfk_member_order.member_id', $member->id)
+                ->whereIn('mzfk_member_order.type', [1,2])
+                ->where('mzfk_member_order.pay_state', 2)
                 ->orderBy('mzfk_member_order.id','desc')
                 ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.create_time')
                 ->first();
