@@ -403,14 +403,14 @@ class Member extends Model
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
                 $query->where('mzfk_member.create_time', '>=', $startTime);
                 $query->where('mzfk_member.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
                 $query->where('mzfk_member.create_time', '>=', $startTime);
                 $query->where('mzfk_member.create_time', '<=', $endTime);
@@ -456,7 +456,9 @@ class Member extends Model
             });*/
 
         $member_lists = $query->selectRaw('mzfk_member.id,mzfk_member.nickname,mzfk_member.create_time as m_create_time,mzfk_member.vip_level,mzfk_member.vip_expired,account.register_os,mzfk_member.state')
-            ->limit($pageSize)->offset(($page - 1) * $pageSize)->get();
+                              ->limit($pageSize)
+                              ->offset(($page - 1) * $pageSize)
+                              ->get();
 
 
         foreach ($member_lists as $member) {

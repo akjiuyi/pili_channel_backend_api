@@ -16,6 +16,33 @@ use Illuminate\Http\Request;
 class TestController extends Controller
 {
     public function index(Request $request) {
+
+
+        /*$startTime = strtotime(date('Y-m-d 00:00:00'),time());
+        $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+
+        echo $startTime."--".$endTime."<br/>";
+
+
+        $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
+        $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+
+        echo $startTime."--".$endTime."<br/>";die;*/
+
+
+        $startTime = date('Y-m-d 00:00:00',time());
+        $endTime = date('Y-m-d 23:59:59',time());
+
+        echo $startTime."--".$endTime."<br/>";
+
+
+        $startTime = date('Y-m-d 00:00:00',strtotime("-1 day"));
+        $endTime = date('Y-m-d 23:59:59',strtotime("-1 day"));
+
+        echo $startTime."--".$endTime."<br/>";die;
+
+
+
         echo date('Y-m-d H:i:s');die;
 
         $s = \Illuminate\Support\Facades\Cache::put('testexpire', 1111, 4);
