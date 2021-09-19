@@ -24,8 +24,8 @@ class Member extends Model
     public static function getTodayMemberCountByChannelId($channelId) {
         if ($channelId <= 0) return 0;
 
-        $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-        $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+        $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+        $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
         return self::query()->where('channel_id', $channelId)
                             ->where('create_time', '>=', $startTime)
@@ -38,8 +38,8 @@ class Member extends Model
     public static function getTodayActiveMemberCountByChannelId($channelId) {
         if ($channelId <= 0) return 0;
 
-        $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-        $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+        $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+        $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
         return self::query()
             ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
@@ -59,36 +59,41 @@ class Member extends Model
 
         $query = parent::query()
                 ->leftJoin('mzfk_member_account as account', 'account.id', 'mzfk_member.id')
+                ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
                 ->where('mzfk_member.channel_id', $channelId)
                 ->where('account.register_os', $os);
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }
         }
 
         if($startDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('mzfk_member.create_time', '>=', $startTime);
+            $query->where('record.create_time', '>=', $startTime);
         }
 
         if($endDate){
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('mzfk_member.create_time', '<=', $endTime);
+            $query->where('record.create_time', '<=', $endTime);
         }
 
-        return $query->count();
+        $count = $query->select('mzfk_member.id')
+                    ->distinct()
+                    ->count('mzfk_member.id');
+
+        return $count;
     }
 
 
@@ -98,41 +103,46 @@ class Member extends Model
 
         $query = parent::query()
             ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId)
             ->where('order.pay_state', 2);
 
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }
         }
 
         if($startDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('mzfk_member.create_time', '>=', $startTime);
+            $query->where('record.create_time', '>=', $startTime);
         }
 
         if($endDate){
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('mzfk_member.create_time', '<=', $endTime);
+            $query->where('record.create_time', '<=', $endTime);
         }
 
         $charge_member_count = $query->select('mzfk_member.id')
                                      ->distinct()
                                      ->count('mzfk_member.id');
 
-        return ['charge_times'=>$query->count(),'charge_member_count'=>$charge_member_count];
+        $charge_times = $query->select('order.id')
+                                ->distinct()
+                                ->count('order.id');
+
+        return ['charge_times'=>$charge_times,'charge_member_count'=>$charge_member_count];
     }
 
 
@@ -142,6 +152,7 @@ class Member extends Model
 
         $query = parent::query()
             ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
+            //->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId)
             ->whereIn('order.type', [1,2])
             ->where('order.pay_state', 2);
@@ -149,28 +160,28 @@ class Member extends Model
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('order.update_time', '>=', $startTime);
+                $query->where('order.update_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('order.update_time', '>=', $startTime);
+                $query->where('order.update_time', '<=', $endTime);
             }
         }
 
         if($startDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('mzfk_member.create_time', '>=', $startTime);
+            $query->where('order.update_time', '>=', $startTime);
         }
 
         if($endDate){
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('mzfk_member.create_time', '<=', $endTime);
+            $query->where('order.update_time', '<=', $endTime);
         }
 
 
@@ -193,28 +204,28 @@ class Member extends Model
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }
         }
 
         if($startDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('mzfk_member.create_time', '>=', $startTime);
+            $query->where('record.create_time', '>=', $startTime);
         }
 
         if($endDate){
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('mzfk_member.create_time', '<=', $endTime);
+            $query->where('record.create_time', '<=', $endTime);
         }
 
         if($dataOptionValue||$startDate||$endDate){
@@ -237,36 +248,45 @@ class Member extends Model
         if ($channelId <= 0) return 0;
 
         $query = parent::query()
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             ->where('mzfk_member.channel_id', $channelId);
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }
         }
 
         if($startDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('mzfk_member.create_time', '>=', $startTime);
+            $query->where('record.create_time', '>=', $startTime);
         }
 
         if($endDate){
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('mzfk_member.create_time', '<=', $endTime);
+            $query->where('record.create_time', '<=', $endTime);
         }
 
+        if($dataOptionValue||$startDate||$endDate){
+            $total_member_count = $query->select('record.member_id')
+                                        ->distinct()
+                                        ->count('record.member_id');
+        }else{
+            $total_member_count = parent::query()->where('mzfk_member.channel_id', $channelId)
+                                        ->count();
+        }
 
-        return $query->count();
+        return $total_member_count;
     }
 
 
@@ -280,14 +300,14 @@ class Member extends Model
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
                 $query->where('mzfk_member.create_time', '>=', $startTime);
                 $query->where('mzfk_member.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
                 $query->where('mzfk_member.create_time', '>=', $startTime);
                 $query->where('mzfk_member.create_time', '<=', $endTime);
@@ -321,14 +341,14 @@ class Member extends Model
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),time());
-                $endTime = strtotime(date('Y-m-d 23:59:59'),time());
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
                 $query->where('mzfk_member.create_time', '>=', $startTime);
                 $query->where('mzfk_member.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
-                $startTime = strtotime(date('Y-m-d 00:00:00'),strtotime("-1 day"));
-                $endTime = strtotime(date('Y-m-d 23:59:59'),strtotime("-1 day"));
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
                 $query->where('mzfk_member.create_time', '>=', $startTime);
                 $query->where('mzfk_member.create_time', '<=', $endTime);
@@ -396,66 +416,45 @@ class Member extends Model
         $query = parent::query()
             //->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
             ->leftJoin('mzfk_member_account as account', 'account.id', 'mzfk_member.id')
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             //->leftJoin('mzfk_app_product as product', 'product.id', 'order.product_id')
             //->whereIn('order.type', [1,2])
             ->where([['mzfk_member.channel_id', $channe_id]]);
 
-
+        $startTime=$endTime='';
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
                 $startTime = strtotime(date('Y-m-d 00:00:00',time()));
                 $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }else if($dataOptionValue == 2){  //昨天
                 $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
                 $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('mzfk_member.create_time', '>=', $startTime);
-                $query->where('mzfk_member.create_time', '<=', $endTime);
+                $query->where('record.create_time', '>=', $startTime);
+                $query->where('record.create_time', '<=', $endTime);
             }
         }
 
 
         if ($startDate) {
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('mzfk_member.create_time', '>=', $startTime);
+            $query->where('record.create_time', '>=', $startTime);
         }
 
         if ($endDate) {
             $endTime = strtotime($endDate." 23:59:59");
-            $query->where('mzfk_member.create_time', '<=', $endTime);
+            $query->where('record.create_time', '<=', $endTime);
         }
 
-        $count = $query->count();
+        $count = $query->distinct('mzfk_member.id')->count();
 
         $lists = [];
-        /*$query->selectRaw('mzfk_member.id,mzfk_member.nickname,mzfk_member.create_time as m_create_time,mzfk_member.vip_level,mzfk_member.vip_expired,account.register_os,mzfk_member.state')
-            ->limit($pageSize)->offset(($page - 1) * $pageSize)->chunk(100, function ($users) use(&$lists){
-                foreach ($users as $user) {
-                    $res = DB::table('mzfk_member_order')
-                        ->leftJoin('mzfk_app_product as product', 'product.id', 'mzfk_member_order.product_id')
-                        ->where('mzfk_member_order.member_id', $user->id)
-                        ->orderBy('mzfk_member_order.id','desc')
-                        ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.create_time')
-                        ->first();
-
-
-                    if($res){
-                        $user->trade_amount = $res->trade_amount;
-                        $user->order_no = $res->order_no;
-                        $user->type = $res->type;
-                        $user->real_amount = $res->real_amount;
-                        $user->title = $res->title;
-                        $user->create_time = $res->create_time;
-                    }
-
-                    $lists[] = $user;
-                }
-            });*/
-
         $member_lists = $query->selectRaw('mzfk_member.id,mzfk_member.nickname,mzfk_member.create_time as m_create_time,mzfk_member.vip_level,mzfk_member.vip_expired,account.register_os,mzfk_member.state')
+                              ->orderBy('mzfk_member.id','desc')
+                              ->distinct('mzfk_member.id')
                               ->limit($pageSize)
                               ->offset(($page - 1) * $pageSize)
                               ->get();
@@ -503,18 +502,33 @@ class Member extends Model
             }
 
 
-            //vip到期时间
-            /*$vip_expired = '';
-            if($info->vip_level > 1){
-                $vip_expired = displayCreatedTime($info->vip_expired,'Y-m-d H:i:s');
-            }*/
-
             //最近访问
             $last_access = '';
-            $create_time = DB::table('mzfk_member_event_log')
-                ->where('member_id', $info->id)
-                ->orderBy('id','desc')
-                ->value('create_time');
+            if($startTime){
+                $create_time = DB::table('mzfk_member_event_log')
+                    ->where('member_id', $info->id)
+                    ->where('create_time','>=', $startTime)
+                    ->orderBy('id','desc')
+                    ->value('create_time');
+            }else if($endTime){
+                $create_time = DB::table('mzfk_member_event_log')
+                    ->where('member_id', $info->id)
+                    ->where('create_time','<=', $endTime)
+                    ->orderBy('id','desc')
+                    ->value('create_time');
+            }else if($startTime&&$endTime){
+                $create_time = DB::table('mzfk_member_event_log')
+                    ->where('member_id', $info->id)
+                    ->where('create_time','>=', $startTime)
+                    ->where('create_time','<=', $endTime)
+                    ->orderBy('id','desc')
+                    ->value('create_time');
+            }else{
+                $create_time = DB::table('mzfk_member_event_log')
+                    ->where('member_id', $info->id)
+                    ->orderBy('id','desc')
+                    ->value('create_time');
+            }
 
             if($create_time){
                 $last_access = displayCreatedTime($create_time,'Y-m-d H:i:s');
