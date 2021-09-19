@@ -173,7 +173,12 @@ class Member extends Model
             $query->where('mzfk_member.create_time', '<=', $endTime);
         }
 
-        //return $query->count();
+
+        /*$charge_amount =  $query->sum('trade_amount');
+        $charge_member_count =  $query->select('mzfk_member.id')
+                                ->distinct()
+                                ->count('mzfk_member.id');*/
+
         return $query->sum('trade_amount');
     }
 
