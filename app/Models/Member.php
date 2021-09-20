@@ -470,7 +470,7 @@ class Member extends Model
                 ->whereIn('mzfk_member_order.type', [1,2])
                 ->where('mzfk_member_order.pay_state', 2)
                 ->orderBy('mzfk_member_order.id','desc')
-                ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.create_time')
+                ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.update_time')
                 ->first();
 
 
@@ -480,7 +480,7 @@ class Member extends Model
                 $member->type = $res->type;
                 $member->real_amount = $res->real_amount;
                 $member->title = $res->title;
-                $member->create_time = $res->create_time;
+                $member->create_time = $res->update_time;
             }
 
             $lists[] = $member;
@@ -490,9 +490,9 @@ class Member extends Model
         $data = [];
         foreach($lists as $info) {
             if($info->type == 1){
-                $order_info = "购买时间：{$info->create_time}/购买会员：{$info->title}";
+                $order_info = "购买时间：{$info->update_time}/购买会员：{$info->title}";
             }elseif($info->type == 2){
-                $order_info = "购买时间：{$info->create_time}/购买金币：{$info->title}";
+                $order_info = "购买时间：{$info->update_time}/购买金币：{$info->title}";
             }else{
                 $info->trade_amount = '';
                 $order_info = "";
