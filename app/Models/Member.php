@@ -480,7 +480,7 @@ class Member extends Model
                 $member->type = $res->type;
                 $member->real_amount = $res->real_amount;
                 $member->title = $res->title;
-                $member->create_time = $res->update_time;
+                $member->update_time = $res->update_time;
             }
 
             $lists[] = $member;
