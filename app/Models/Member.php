@@ -59,38 +59,80 @@ class Member extends Model
 
         $query = parent::query()
                 ->leftJoin('mzfk_member_account as account', 'account.id', 'mzfk_member.id')
+                ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
                 ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
                 ->where('mzfk_member.channel_id', $channelId)
                 ->where('account.register_os', $os);
+                //->whereIn('order.type', [1,2]);
 
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
                 $startTime = strtotime(date('Y-m-d 00:00:00',time()));
                 $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('record.create_time', '>=', $startTime);
-                $query->where('record.create_time', '<=', $endTime);
+                $query->Where(function ($query)use($startTime,$endTime) {
+                    //$query->where([['order.type', 'in', [1,2]],['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                    $query->where(function ($query)use($startTime,$endTime){
+                        $query->whereIn('order.type', [1,2])
+                              ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                    });
+                    $query->orWhere([['record.create_time', '>=', $startTime],['record.create_time', '<=', $endTime]]);
+                });
             }else if($dataOptionValue == 2){  //昨天
                 $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
                 $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('record.create_time', '>=', $startTime);
-                $query->where('record.create_time', '<=', $endTime);
+                $query->Where(function ($query)use($startTime,$endTime) {
+                    //$query->where([['order.type', 'in', [1,2]],['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                    $query->where(function ($query)use($startTime,$endTime){
+                        $query->whereIn('order.type', [1,2])
+                            ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                    });
+                    $query->orWhere([['record.create_time', '>=', $startTime],['record.create_time', '<=', $endTime]]);
+                });
             }
         }
 
-        if($startDate){
+
+        if($startDate&&!$endDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('record.create_time', '>=', $startTime);
+
+            $query->where(function ($query)use($startTime) {
+                $query->where(function ($query)use($startTime){
+                    $query->whereIn('order.type', [1,2])
+                        ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime]]);
+                });
+                $query->orWhere('record.create_time', '>=', $startTime);
+            });
+
+        }else if(!$startDate&&$endDate){
+            $endTime = strtotime($endDate." 23:59:59");
+
+            $query->where(function ($query)use($endTime) {
+                $query->where(function ($query)use($endTime){
+                    $query->whereIn('order.type', [1,2])
+                        ->where([['order.pay_state', '=', 2],['order.update_time', '<=', $endTime]]);
+                });
+                $query->orWhere('record.create_time', '<=', $endTime);
+            });
+        }else if($startDate&&$endDate){
+            $startTime = strtotime($startDate." 00:00:00");
+            $endTime = strtotime($endDate." 23:59:59");
+
+            $query->where(function ($query)use($startTime,$endTime) {
+                $query->where(function ($query)use($startTime,$endTime){
+                    $query->whereIn('order.type', [1,2])
+                        ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                });
+                $query->orWhere([['record.create_time', '>=', $startTime],['record.create_time', '<=', $endTime]]);
+            });
         }
 
-        if($endDate){
-            $endTime = strtotime($endDate." 23:59:59");
-            $query->where('record.create_time', '<=', $endTime);
-        }
+        //$count = $query->toSql();
+        //print_r($count);die;
 
         $count = $query->select('mzfk_member.id')
-                    ->distinct()
+                    ->distinct('mzfk_member.id')
                     ->count('mzfk_member.id');
 
         return $count;
@@ -417,12 +459,14 @@ class Member extends Model
 
     public static function getChannelUserLists($channe_id, $dataOptionValue, $startDate, $endDate, $page, $pageSize){
         $query = parent::query()
-            //->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
+            ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
             ->leftJoin('mzfk_member_account as account', 'account.id', 'mzfk_member.id')
             ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
             //->leftJoin('mzfk_app_product as product', 'product.id', 'order.product_id')
             //->whereIn('order.type', [1,2])
+            //->where('order.pay_state', 2)
             ->where([['mzfk_member.channel_id', $channe_id]]);
+
 
         $startTime=$endTime='';
         if ($dataOptionValue) {
@@ -430,27 +474,64 @@ class Member extends Model
                 $startTime = strtotime(date('Y-m-d 00:00:00',time()));
                 $endTime = strtotime(date('Y-m-d 23:59:59',time()));
 
-                $query->where('record.create_time', '>=', $startTime);
-                $query->where('record.create_time', '<=', $endTime);
+                $query->Where(function ($query)use($startTime,$endTime) {
+                    $query->where(function ($query)use($startTime,$endTime){
+                        $query->whereIn('order.type', [1,2])
+                            ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                    });
+                    $query->orWhere([['record.create_time', '>=', $startTime],['record.create_time', '<=', $endTime]]);
+                });
             }else if($dataOptionValue == 2){  //昨天
                 $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
                 $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
 
-                $query->where('record.create_time', '>=', $startTime);
-                $query->where('record.create_time', '<=', $endTime);
+                $query->Where(function ($query)use($startTime,$endTime) {
+                    $query->where(function ($query)use($startTime,$endTime){
+                        $query->whereIn('order.type', [1,2])
+                            ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                    });
+
+                    $query->orWhere([['record.create_time', '>=', $startTime],['record.create_time', '<=', $endTime]]);
+                });
             }
         }
 
-
-        if ($startDate) {
+        if($startDate&&!$endDate){
             $startTime = strtotime($startDate." 00:00:00");
-            $query->where('record.create_time', '>=', $startTime);
+
+            $query->where(function ($query)use($startTime) {
+                $query->where(function ($query)use($startTime){
+                    $query->whereIn('order.type', [1,2])
+                        ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime]]);
+                });
+                $query->orWhere('record.create_time', '>=', $startTime);
+            });
+
+        }else if(!$startDate&&$endDate){
+            $endTime = strtotime($endDate." 23:59:59");
+
+            $query->where(function ($query)use($endTime) {
+                $query->where(function ($query)use($endTime){
+                    $query->whereIn('order.type', [1,2])
+                          ->where([['order.pay_state', '=', 2],['order.update_time', '<=', $endTime]]);
+                });
+
+                $query->orWhere('record.create_time', '<=', $endTime);
+            });
+        }else if($startDate&&$endDate){
+            $startTime = strtotime($startDate." 00:00:00");
+            $endTime = strtotime($endDate." 23:59:59");
+
+            $query->where(function ($query)use($startTime,$endTime) {
+                $query->where(function ($query)use($startTime,$endTime){
+                    $query->whereIn('order.type', [1,2])
+                          ->where([['order.pay_state', '=', 2],['order.update_time', '>=', $startTime],['order.update_time', '<=', $endTime]]);
+                });
+                $query->orWhere([['record.create_time', '>=', $startTime],['record.create_time', '<=', $endTime]]);
+            });
         }
 
-        if ($endDate) {
-            $endTime = strtotime($endDate." 23:59:59");
-            $query->where('record.create_time', '<=', $endTime);
-        }
+        //print_r($query->toSql());die;
 
         $count = $query->distinct('mzfk_member.id')->count();
 
@@ -462,25 +543,37 @@ class Member extends Model
                               ->offset(($page - 1) * $pageSize)
                               ->get();
 
-
         foreach ($member_lists as $member) {
-            $res = DB::table('mzfk_member_order')
+            $order_query = DB::table('mzfk_member_order')
                 ->leftJoin('mzfk_app_product as product', 'product.id', 'mzfk_member_order.product_id')
                 ->where('mzfk_member_order.member_id', $member->id)
                 ->whereIn('mzfk_member_order.type', [1,2])
-                ->where('mzfk_member_order.pay_state', 2)
-                ->orderBy('mzfk_member_order.id','desc')
+                ->where('mzfk_member_order.pay_state', 2);
+
+            if($startTime&&!$endTime){
+                $order_query->where('mzfk_member_order.update_time', '>=', $startTime);
+            }elseif (!$startTime&&$endTime){
+                $order_query->where('mzfk_member_order.update_time', '<=', $endTime);
+            }elseif($startTime&&$endTime){
+                $order_query->where('mzfk_member_order.update_time', '>=', $startTime);
+                $order_query->where('mzfk_member_order.update_time', '<=', $endTime);
+            }
+
+            $res = $order_query->orderBy('mzfk_member_order.id','desc')
                 ->select('mzfk_member_order.trade_amount','mzfk_member_order.order_no','mzfk_member_order.type','mzfk_member_order.real_amount','product.title','mzfk_member_order.update_time')
                 ->first();
 
+            $order_count = $order_query->count();
+            $total_amout = $order_query->sum('trade_amount');
 
             if($res){
-                $member->trade_amount = $res->trade_amount;
+                $member->total_trade_amount = $total_amout;
                 $member->order_no = $res->order_no;
                 $member->type = $res->type;
                 $member->real_amount = $res->real_amount;
                 $member->title = $res->title;
                 $member->update_time = $res->update_time;
+                $member->order_count = $order_count;
             }
 
             $lists[] = $member;
@@ -490,9 +583,12 @@ class Member extends Model
         $data = [];
         foreach($lists as $info) {
             if($info->type == 1){
-                $order_info = "购买时间：{$info->update_time}/购买会员：{$info->title}";
+                $order_info = [];
+                $order_info['buy_time'] = "购买时间：{$info->update_time}";
+                $order_info['buy_title'] = "购买会员：{$info->title}";
             }elseif($info->type == 2){
-                $order_info = "购买时间：{$info->update_time}/购买金币：{$info->title}";
+                $order_info['buy_time'] = "购买时间：{$info->update_time}";
+                $order_info['buy_title'] = "购买金币：{$info->title}";
             }else{
                 $info->trade_amount = '';
                 $order_info = "";
@@ -548,8 +644,9 @@ class Member extends Model
                     'android' => '安卓',
                     'ios' => '苹果',
                 },
-                'trade_amount' => $info->trade_amount,
-                'order_info' => $order_info,
+                'trade_amount' => $info->total_trade_amount,   //订单总交易额
+                'order_info' => $order_info,    //订单信息
+                'order_count' => $info->order_count,   //订单数量
                 'create_time' => displayCreatedTime($info->m_create_time,'Y-m-d H:i:s'),
                 'vip_expired' => $vip_expired,
                 'last_access' => $last_access
@@ -559,6 +656,65 @@ class Member extends Model
         return [
             'total' => $count,
             'items' => $data
+        ];
+    }
+
+
+
+    public static function getOrderLists($memberId, $dataOptionValue, $startDate, $endDate, $page, $pageSize){
+
+        $startTime=$endTime='';
+        if ($dataOptionValue) {
+            if($dataOptionValue == 1){   //今天
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
+            }else if($dataOptionValue == 2){  //昨天
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
+            }
+        }
+
+
+        if($startDate&&!$endDate){
+            $startTime = strtotime($startDate." 00:00:00");
+        }else if(!$startDate&&$endDate){
+            $endTime = strtotime($endDate." 23:59:59");
+
+        }else if($startDate&&$endDate){
+            $startTime = strtotime($startDate." 00:00:00");
+            $endTime = strtotime($endDate." 23:59:59");
+        }
+
+        $order_query = DB::table('mzfk_member_order')
+            ->leftJoin('mzfk_app_product as product', 'product.id', 'mzfk_member_order.product_id')
+            ->where('mzfk_member_order.member_id', $memberId)
+            ->whereIn('mzfk_member_order.type', [1,2])
+            ->where('mzfk_member_order.pay_state', 2);
+
+        if($startTime&&!$endTime){
+            $order_query->where('mzfk_member_order.update_time', '>=', $startTime);
+        }elseif (!$startTime&&$endTime){
+            $order_query->where('mzfk_member_order.update_time', '<=', $endTime);
+        }elseif($startTime&&$endTime){
+            $order_query->where('mzfk_member_order.update_time', '>=', $startTime);
+            $order_query->where('mzfk_member_order.update_time', '<=', $endTime);
+        }
+
+        $count = $order_query->count();
+
+        $lists = $order_query->orderBy('mzfk_member_order.id','desc')
+            ->select('mzfk_member_order.trade_amount','product.title','mzfk_member_order.update_time')
+            ->limit($pageSize)
+            ->offset(($page - 1) * $pageSize)
+            ->get();
+
+        foreach ($lists as $v){
+            $v->update_time = date('Y-m-d H:i:s',$v->update_time);
+        }
+
+        return [
+            'total' => $count,
+            'lists' => $lists
         ];
     }
 

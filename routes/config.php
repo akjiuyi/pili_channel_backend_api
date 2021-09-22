@@ -29,6 +29,7 @@ $router->post('/user/resetPwd', ['uses' => 'UserController@resetPwd']);
 $router->post('/user/channelUserLists', ['uses' => 'UserController@channelUserLists']);
 $router->post('/user/summaryInfo', ['uses' => 'UserController@summaryInfo']);
 $router->get('/user/exportFirstPageStatistics', ['uses' => 'UserController@exportFirstPageStatistics']);
+$router->post('/user/getMoreOrder', ['uses' => 'UserController@getMoreOrder']);
 
 
 $router->post('/order/applyWithdraw', ['uses' => 'OrderController@applyWithdraw']);

@@ -68,20 +68,26 @@ class TestController extends Controller
         $channelIosDeviceCount = Member::getDeviceCountByChannelId($channel_id,'ios',$dataOptionValue,$startDate,$endDate);          //苹果设备数
         $channelAndroidDeviceCount = Member::getDeviceCountByChannelId($channel_id,'android',$dataOptionValue,$startDate,$endDate);  //安卓设备数
         $res = Member::getChargeCountByChannelId($channel_id,$dataOptionValue,$startDate,$endDate);
-        $channelChargeCount = $res['charge_times'];  //充值次数
-        //$channelChargeMemberCount = $res['charge_member_count'];  //充值人数
+        //$channelChargeCount = $res['charge_times'];  //充值次数
+        $channelChargeMemberCount = $res['charge_member_count']??0;  //充值人数
         $channelChargeAmount = Member::getChargeAmountByChannelId($channel_id,$dataOptionValue,$startDate,$endDate);             //充值金额
 
-        //$channeGeneralMemberCount = Member::getChannelGeneralMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);    //普通用户数
-        $channeVipMemberCount = Member::getChannelVipMemberCount($channel_id,$dataOptionValue,$startDate,$endDate);              //Vip用户数
-        $channelTotalMemberCount = Member::getChannelTotalMemberCount($channel_id,$dataOptionValue,$startDate,$endDate);         //累计用户
+        //$channeActiveMemberCount = Member::getChannelActiveMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);        //活跃人数
+        $channeTotalMemberCount = $channelIosDeviceCount + $channelAndroidDeviceCount;
 
-        if($channelTotalMemberCount == 0){
+
+        //$channelTotalMemberCount = Member::getChannelTotalMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);         //累计用户
+
+        if($channeTotalMemberCount == 0){
             $channelChargeRate = 0;
-            $channelAvgConsumption = 0;
         }else{
-            $channelChargeRate = $channeVipMemberCount/$channelTotalMemberCount;  //充值比例
-            $channelAvgConsumption = $channelChargeAmount/$channelTotalMemberCount;  //人均消费
+            $channelChargeRate = $channelChargeMemberCount/$channeTotalMemberCount;  //充值比例
+        }
+
+        if($channelChargeMemberCount == 0){
+            $channelAvgConsumption = 0;  //人均消费
+        }else{
+            $channelAvgConsumption = $channelChargeAmount/$channeTotalMemberCount;  //人均消费
         }
 
         $data = [
@@ -91,7 +97,7 @@ class TestController extends Controller
                         'channelTodayActiveMemberCount' => $channelTodayActiveMemberCount,
                         'channelIosDeviceCount' => $channelIosDeviceCount,
                         'channelAndroidDeviceCount' => $channelAndroidDeviceCount,
-                        'channelChargeCount' => $channelChargeCount,
+                        'channelChargeCount' => $channelChargeMemberCount,
                         'channelChargeAmount' => $channelChargeAmount,
                         'channelChargeRate' => sprintf("%.2f",$channelChargeRate*100)."%",
                         'channelAvgConsumption' => sprintf("%.2f",$channelAvgConsumption)
@@ -103,3 +109,5 @@ class TestController extends Controller
         exportExcelV2($data, $header, '渠道统计报表','渠道统计报表');
     }
 }
+
+
