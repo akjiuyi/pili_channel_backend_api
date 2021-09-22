@@ -605,13 +605,13 @@ class Member extends Model
 
             //最近访问
             $last_access = '';
-            if($startTime){
+            if($startTime&&!$endTime){
                 $create_time = DB::table('mzfk_member_event_log')
                     ->where('member_id', $info->id)
                     ->where('create_time','>=', $startTime)
                     ->orderBy('id','desc')
                     ->value('create_time');
-            }else if($endTime){
+            }else if(!$startTime&&$endTime){
                 $create_time = DB::table('mzfk_member_event_log')
                     ->where('member_id', $info->id)
                     ->where('create_time','<=', $endTime)
@@ -624,6 +624,13 @@ class Member extends Model
                     ->where('create_time','<=', $endTime)
                     ->orderBy('id','desc')
                     ->value('create_time');
+
+                if(!$create_time){
+                    $create_time = DB::table('mzfk_member_event_log')
+                        ->where('member_id', $info->id)
+                        ->orderBy('id','desc')
+                        ->value('create_time');
+                }
             }else{
                 $create_time = DB::table('mzfk_member_event_log')
                     ->where('member_id', $info->id)
