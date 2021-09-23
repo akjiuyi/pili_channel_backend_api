@@ -64,15 +64,15 @@ return [
             'write' => [
                 [
                     'host' => env('DB_MASTER_HOST', '127.0.0.1'),
-                    'username'  => env('DB_USERNAME', 'forge'),
-                    'password'  => env('DB_PASSWORD', ''),
+                    'username'  => env('DB_MASTER_USERNAME', 'forge'),
+                    'password'  => env('DB_MASTER_PASSWORD', ''),
                 ],
             ],
             'read' => [
                 [
                     'host' => env('DB_SAVE_HOST', '127.0.0.1'),
-                    'username'  => env('DB_USERNAME', 'forge'),
-                    'password'  => env('DB_PASSWORD', ''),
+                    'username'  => env('DB_SAVE_USERNAME', 'forge'),
+                    'password'  => env('DB_SAVE_PASSWORD', ''),
                 ]
             ],
             'driver' => 'mysql',
