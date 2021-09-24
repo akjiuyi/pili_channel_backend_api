@@ -3,7 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Channel;
 use App\Models\ChannelAccount;
-use App\Models\ChannelBalanceLog;
+use App\Models\MemberOrder;
 use App\Models\Member;
 use App\Models\MemberWithdrawRecord;
 use App\Models\SystemConfig;
@@ -29,10 +29,9 @@ class OrderController extends Controller
         $endDate = $request->input('endDate');
         $paymentChannelId = (int) $request->input('paymentChannelId');
 
-
         $channelInfo = $request->get('channelInfo');
-        $lists = ChannelBalanceLog::getIncomeLists($channelInfo->id,$nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page, $pageSize);
-
+        //$lists = ChannelBalanceLog::getIncomeLists($channelInfo->id,$nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page, $pageSize);
+        $lists = MemberOrder::getIncomeLists($channelInfo->id,$nickname, $state, $productId, $paymentChannelId, $startDate, $endDate, $page, $pageSize);
 
         return $this->successJson($lists);
     }
