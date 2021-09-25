@@ -16,7 +16,7 @@ class PaymentChannel extends Model
             $return[$info->id] = [
                 'id' => $info->id,
                 //'title' => $info->landslide_name,
-                'title' => "{$info->merchant_name}-{$info->payment_name}",
+                'title' => "{$info->merchant_name}-{$info->payment_name}-{$info->passageway_code}",
                 'desc' => $info->descs,
                 'originalPrice' => $info->original_price,
                 'discountPrice' => $info->discount_price
@@ -29,7 +29,7 @@ class PaymentChannel extends Model
         parent::query()->where('app_group','')->get()->each(function($info) use (&$return){
             $return[] = [
                 'id' => $info->id,
-                'landslideName' => "id:{$info->id}-{$info->merchant_name}-{$info->payment_name}",
+                'landslideName' => "{$info->merchant_name}-{$info->payment_name}-{$info->passageway_code}",
             ];
         });
         return $return;
