@@ -87,7 +87,7 @@ class MemberOrder extends Model
                 'amount' => $info->discount_price,
                 'income' => $income,
                 //'createDate' => displayCreatedTime($info->create_time),
-                'createDate' => displayCreatedTime($info->update_time),
+                'createDate' => displayCreatedTime($info->update_time,'Y-m-d H:i:s'),
                 'state' => $info->pay_state,
                 'stateDesc' => match($info->pay_state) { //1 尚未支付 2 已经支付 3 支付失败 4已经发放
                 1    => '待支付',

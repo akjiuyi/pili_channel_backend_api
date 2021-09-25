@@ -28,7 +28,7 @@ class AppProduct extends Model
         parent::query()->where('product_handler', $handleName)->get()->each(function($info) use (&$return){
             $return[] = [
                 'id' => $info->id,
-                'title' => $info->title,
+                'title' => "id:{$info->id}-{$info->title}",
                 'desc' => $info->descs,
                 'originalPrice' => $info->original_price,
                 'discountPrice' => $info->discount_price
