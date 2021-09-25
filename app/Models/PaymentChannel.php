@@ -16,7 +16,7 @@ class PaymentChannel extends Model
             $return[$info->id] = [
                 'id' => $info->id,
                 //'title' => $info->landslide_name,
-                'title' => "id:{$info->id}-{$info->merchant_name}-{$info->payment_name}",
+                'title' => "{$info->merchant_name}-{$info->payment_name}",
                 'desc' => $info->descs,
                 'originalPrice' => $info->original_price,
                 'discountPrice' => $info->discount_price
