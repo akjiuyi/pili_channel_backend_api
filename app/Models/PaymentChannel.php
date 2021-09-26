@@ -26,7 +26,7 @@ class PaymentChannel extends Model
     }
 
     public static function appProductLists() {
-        parent::query()->where('app_group','')->get()->each(function($info) use (&$return){
+        parent::query()->where('app_group','')->where('state',1)->get()->each(function($info) use (&$return){
             $return[] = [
                 'id' => $info->id,
                 'landslideName' => "{$info->merchant_name}-{$info->payment_name}-{$info->passageway_code}",

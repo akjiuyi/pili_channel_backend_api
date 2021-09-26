@@ -51,7 +51,10 @@ class MemberOrder extends Model
         $count = $query->count();
 
         $lists = $query->selectRaw('order.id,order.order_no,order.member_id,order.product_id,order.commission,member.nickname,product.discount_price,order.channel_id,order.pay_state,order.create_time,order.update_time')
-            ->limit($pageSize)->offset(($page - 1) * $pageSize)->get();
+            ->orderBy('order.update_time','desc')
+            ->limit($pageSize)
+            ->offset(($page - 1) * $pageSize)
+            ->get();
 
         $data = $products = $productIds = $paymentChannels = $paymentChannelIds = [];
 
