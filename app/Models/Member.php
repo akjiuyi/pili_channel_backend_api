@@ -34,6 +34,25 @@ class Member extends Model
     }
 
 
+    //活跃用户
+    public static function getActiveMemberCountByChannelId($channelId,$start_date,$end_date) {
+        if ($channelId <= 0) return 0;
+
+        $startTime = strtotime("{$start_date} 00:00:00");
+        $endTime = strtotime("{$end_date} 23:59:59");
+
+        return self::query()
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
+            ->where('mzfk_member.channel_id', $channelId)
+            ->where('record.create_time', '>=', $startTime)
+            ->where('record.create_time', '<=', $endTime)
+            ->select('record.member_id')
+            ->distinct()
+            ->count();
+
+    }
+
+
     //今日活跃用户
     public static function getTodayActiveMemberCountByChannelId($channelId) {
         if ($channelId <= 0) return 0;
@@ -195,9 +214,10 @@ class Member extends Model
 
         $query = parent::query()
             ->leftJoin('mzfk_member_order as order', 'order.member_id', 'mzfk_member.id')
-            //->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
+            ->leftJoin('mzfk_payment_channel as channel', 'order.channel_id', 'channel.id')
             ->where('mzfk_member.channel_id', $channelId)
             ->whereIn('order.type', [1,2])
+            ->where('channel.app_group', '')
             ->where('order.pay_state', 2);
 
 

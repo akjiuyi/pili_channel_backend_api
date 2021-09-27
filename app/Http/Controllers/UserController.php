@@ -57,7 +57,32 @@ class UserController extends Controller
 
         $channelAllMemberCount = Member::getChannelMemberCount($channelInfo->id);                         //累计用户
         $channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channelInfo->id);              //今日新增用户
-        $channelTodayActiveMemberCount = Member::getTodayActiveMemberCountByChannelId($channelInfo->id);  //今日活跃用户
+
+        //今日活跃用户
+        $start_date = date("Y-m-d");
+        $end_date = date("Y-m-d");
+        $channelTodayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $channelTodayActiveMemberCount = array('date'=>date("m.d"),'active_count'=>$channelTodayActiveMemberCount);
+
+        //昨日活跃用户
+        $start_date = date("Y-m-d",strtotime('-1 day'));
+        $end_date = date("Y-m-d",strtotime('-1 day'));
+
+        $channelYesterdayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $channelYesterdayActiveMemberCount = array('date'=>date("m.d",strtotime('-1 day')),'active_count'=>$channelYesterdayActiveMemberCount);
+
+        //本周活跃用户
+        $start_date = date("Y-m-d",strtotime('Monday'));  //周一
+        $end_date = date("Y-m-d");    //今天
+        $channelWeekActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $channelWeekActiveMemberCount = array('date'=>['monday'=>date("m.d",strtotime('last Monday')),'today'=>date("m.d")],'active_count'=>$channelWeekActiveMemberCount);
+
+        //本月活跃用户
+        $start_date = date("Y-m-01");  //1日
+        $end_date = date("Y-m-d");    //今天
+        $channelMonthActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $channelMonthActiveMemberCount = array('date'=>['first_day'=>date("m.01"),'today'=>date("m.d")],'active_count'=>$channelMonthActiveMemberCount);
+
 
         $channelIosDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'ios',$dataOptionValue,$startDate,$endDate);          //苹果设备数
         $channelAndroidDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'android',$dataOptionValue,$startDate,$endDate);  //安卓设备数
@@ -66,13 +91,10 @@ class UserController extends Controller
         $channelChargeMemberCount = $res['charge_member_count']??0;  //充值人数
         $channelChargeAmount = Member::getChargeAmountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);             //充值金额
 
-
         //$channeActiveMemberCount = Member::getChannelActiveMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);        //活跃人数
         $channeTotalMemberCount = $channelIosDeviceCount + $channelAndroidDeviceCount;
 
-
         //$channelTotalMemberCount = Member::getChannelTotalMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);         //累计用户
-
         if($channeTotalMemberCount == 0){
             $channelChargeRate = 0;
         }else{
@@ -89,7 +111,10 @@ class UserController extends Controller
         return $this->successJson([
             'channelAllMemberCount' => $channelAllMemberCount,
             'channelTodayMemberCount' => $channelTodayMemberCount,
-            'channelTodayActiveMemberCount' => $channelTodayActiveMemberCount,
+            'channelTodayActiveMemberCount' => $channelTodayActiveMemberCount,   //今日活跃
+            'channelYesterdayActiveMemberCount' => $channelYesterdayActiveMemberCount,   //昨日活跃用户
+            'channelWeekActiveMemberCount' => $channelWeekActiveMemberCount,   //本周活跃用户
+            'channelMonthActiveMemberCount' => $channelMonthActiveMemberCount,   //本月活跃用户
             'channelIosDeviceCount' => $channelIosDeviceCount,
             'channelAndroidDeviceCount' => $channelAndroidDeviceCount,
             'channelChargeCount' => $channelChargeMemberCount,
