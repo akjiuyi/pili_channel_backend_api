@@ -34,6 +34,39 @@ class Member extends Model
     }
 
 
+    //新增用户
+    public static function getAddMemberCountByChannelId($channelId,$startDate,$endDate) {
+        if ($channelId <= 0) return 0;
+
+        if($startDate&&!$endDate){
+            $startTime = strtotime("{$startDate} 00:00:00");
+
+            return self::query()->where('channel_id', $channelId)
+                ->where('create_time', '>=', $startTime)
+                ->count();
+        }else if(!$startDate&&$endDate){
+            $endTime = strtotime("{$endDate} 23:59:59");
+
+            return self::query()->where('channel_id', $channelId)
+                ->where('create_time', '<=', $endTime)
+                ->count();
+        }else if($startDate&&$endDate){
+            $startTime = strtotime("{$startDate} 00:00:00");
+            $endTime = strtotime("{$endDate} 23:59:59");
+
+            return self::query()->where('channel_id', $channelId)
+                ->where('create_time', '>=', $startTime)
+                ->where('create_time', '<=', $endTime)
+                ->count();
+        }else{
+            return self::query()->where('channel_id', $channelId)
+                ->count();
+        }
+
+    }
+
+
+
     //活跃用户
     public static function getActiveMemberCountByChannelId($channelId,$start_date,$end_date) {
         if ($channelId <= 0) return 0;
@@ -51,37 +84,11 @@ class Member extends Model
             ->count();
 
         /*DB::connection()->enableQueryLog();
-        $jjj= self::query()
-            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
-            ->where('mzfk_member.channel_id', $channelId)
-            ->where('record.create_time', '>=', $startTime)
-            ->where('record.create_time', '<=', $endTime)
-            //->select('record.member_id')
-            ->distinct('record.member_id')
-            ->count();
 
         dd( DB::getQueryLog());*/
 
     }
 
-
-    //今日活跃用户
-    public static function getTodayActiveMemberCountByChannelId($channelId) {
-        if ($channelId <= 0) return 0;
-
-        $startTime = strtotime(date('Y-m-d 00:00:00',time()));
-        $endTime = strtotime(date('Y-m-d 23:59:59',time()));
-
-        return self::query()
-            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
-            ->where('mzfk_member.channel_id', $channelId)
-            ->where('record.create_time', '>=', $startTime)
-            ->where('record.create_time', '<=', $endTime)
-            ->select('record.member_id')
-            ->distinct()
-            ->count('record.member_id');
-
-    }
 
 
     //苹果\安卓设备数
@@ -307,7 +314,7 @@ class Member extends Model
 
         if($dataOptionValue||$startDate||$endDate){
             $active_member_count = $query->select('record.member_id')
-                ->distinct()
+                ->distinct('record.member_id')
                 ->count('record.member_id');
         }else{
             $active_member_count = parent::query()

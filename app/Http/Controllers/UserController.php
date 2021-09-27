@@ -55,8 +55,9 @@ class UserController extends Controller
         $channelInfo = $request->get('channelInfo');
         //$channelInfo = Channel::getInfoById($channelInfo->id);
 
-        $channelAllMemberCount = Member::getChannelMemberCount($channelInfo->id);                         //累计用户
-        $channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channelInfo->id);              //今日新增用户
+        $channelAllMemberCount = Member::getChannelMemberCount($channelInfo->id);                               //累计用户
+        //$channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channelInfo->id);                  //今日新增用户
+        $channelAddMemberCount = Member::getAddMemberCountByChannelId($channelInfo->id,$startDate,$endDate);    //新增用户
 
         //今日活跃用户
         $start_date_up = date("Y-m-d");
@@ -82,7 +83,6 @@ class UserController extends Controller
         $end_date_up = date("Y-m-d");    //今天
         $channelMonthActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
         $channelMonthActiveMemberCount = array('date'=>['first_day'=>date("m.01"),'today'=>date("m.d")],'active_count'=>$channelMonthActiveMemberCount);
-
 
         $channelIosDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'ios',$dataOptionValue,$startDate,$endDate);          //苹果设备数
         $channelAndroidDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'android',$dataOptionValue,$startDate,$endDate);  //安卓设备数
@@ -110,7 +110,8 @@ class UserController extends Controller
 
         return $this->successJson([
             'channelAllMemberCount' => $channelAllMemberCount,
-            'channelTodayMemberCount' => $channelTodayMemberCount,
+            //'channelTodayMemberCount' => $channelTodayMemberCount,
+            'channelAddMemberCount' => $channelAddMemberCount,
             'channelTodayActiveMemberCount' => $channelTodayActiveMemberCount,   //今日活跃
             'channelYesterdayActiveMemberCount' => $channelYesterdayActiveMemberCount,   //昨日活跃用户
             'channelWeekActiveMemberCount' => $channelWeekActiveMemberCount,   //本周活跃用户
