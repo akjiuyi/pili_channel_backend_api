@@ -59,28 +59,28 @@ class UserController extends Controller
         $channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channelInfo->id);              //今日新增用户
 
         //今日活跃用户
-        $start_date = date("Y-m-d");
-        $end_date = date("Y-m-d");
-        $channelTodayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $start_date_up = date("Y-m-d");
+        $end_date_up = date("Y-m-d");
+        $channelTodayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
         $channelTodayActiveMemberCount = array('date'=>date("m.d"),'active_count'=>$channelTodayActiveMemberCount);
 
         //昨日活跃用户
-        $start_date = date("Y-m-d",strtotime('-1 day'));
-        $end_date = date("Y-m-d",strtotime('-1 day'));
+        $start_date_up = date("Y-m-d",strtotime('-1 day'));
+        $end_date_up = date("Y-m-d",strtotime('-1 day'));
 
-        $channelYesterdayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $channelYesterdayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
         $channelYesterdayActiveMemberCount = array('date'=>date("m.d",strtotime('-1 day')),'active_count'=>$channelYesterdayActiveMemberCount);
 
         //本周活跃用户
-        $start_date = date("Y-m-d",strtotime('Monday'));  //周一
-        $end_date = date("Y-m-d");    //今天
-        $channelWeekActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $start_date_up = date("Y-m-d",strtotime('Monday'));  //周一
+        $end_date_up = date("Y-m-d");    //今天
+        $channelWeekActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
         $channelWeekActiveMemberCount = array('date'=>['monday'=>date("m.d",strtotime('last Monday')),'today'=>date("m.d")],'active_count'=>$channelWeekActiveMemberCount);
 
         //本月活跃用户
-        $start_date = date("Y-m-01");  //1日
-        $end_date = date("Y-m-d");    //今天
-        $channelMonthActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date,$end_date);
+        $start_date_up = date("Y-m-01");  //1日
+        $end_date_up = date("Y-m-d");    //今天
+        $channelMonthActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
         $channelMonthActiveMemberCount = array('date'=>['first_day'=>date("m.01"),'today'=>date("m.d")],'active_count'=>$channelMonthActiveMemberCount);
 
 
