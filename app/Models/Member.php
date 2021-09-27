@@ -209,11 +209,11 @@ class Member extends Model
         }
 
         $charge_member_count = $query->select('mzfk_member.id')
-                                     ->distinct()
+                                     ->distinct('mzfk_member.id')
                                      ->count('mzfk_member.id');
 
         $charge_times = $query->select('order.id')
-                                ->distinct()
+                                ->distinct('order.id')
                                 ->count('order.id');
 
         return ['charge_times'=>$charge_times,'charge_member_count'=>$charge_member_count];
