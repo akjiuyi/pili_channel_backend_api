@@ -46,9 +46,21 @@ class Member extends Model
             ->where('mzfk_member.channel_id', $channelId)
             ->where('record.create_time', '>=', $startTime)
             ->where('record.create_time', '<=', $endTime)
-            ->select('record.member_id')
-            ->distinct()
+            //->select('record.member_id')
+            ->distinct('record.member_id')
             ->count();
+
+        /*DB::connection()->enableQueryLog();
+        $jjj= self::query()
+            ->leftJoin('mzfk_member_event_log as record', 'record.member_id', 'mzfk_member.id')
+            ->where('mzfk_member.channel_id', $channelId)
+            ->where('record.create_time', '>=', $startTime)
+            ->where('record.create_time', '<=', $endTime)
+            //->select('record.member_id')
+            ->distinct('record.member_id')
+            ->count();
+
+        dd( DB::getQueryLog());*/
 
     }
 
