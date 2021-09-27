@@ -72,10 +72,10 @@ class UserController extends Controller
         $channelYesterdayActiveMemberCount = array('date'=>date("m.d",strtotime('-1 day')),'active_count'=>$channelYesterdayActiveMemberCount);
 
         //本周活跃用户
-        $start_date_up = date("Y-m-d",strtotime('Monday'));  //周一
+        $start_date_up = date("Y-m-d",strtotime( 'this week Monday' ,time()));  //周一
         $end_date_up = date("Y-m-d");    //今天
         $channelWeekActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
-        $channelWeekActiveMemberCount = array('date'=>['monday'=>date("m.d",strtotime('last Monday')),'today'=>date("m.d")],'active_count'=>$channelWeekActiveMemberCount);
+        $channelWeekActiveMemberCount = array('date'=>['monday'=>date("m.d",strtotime( 'this week Monday' ,time())),'today'=>date("m.d")],'active_count'=>$channelWeekActiveMemberCount);
 
         //本月活跃用户
         $start_date_up = date("Y-m-01");  //1日
