@@ -132,7 +132,14 @@ class UserController extends Controller
 
         $channelAllMemberCount = Member::getChannelMemberCount($channelInfo->id);                         //累计用户
         $channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channelInfo->id);              //今日新增用户
-        $channelTodayActiveMemberCount = Member::getTodayActiveMemberCountByChannelId($channelInfo->id);  //今日活跃用户
+        //$channelTodayActiveMemberCount = Member::getTodayActiveMemberCountByChannelId($channelInfo->id);  //今日活跃用户
+
+        //今日活跃用户
+        $start_date_up = date("Y-m-d");
+        $end_date_up = date("Y-m-d");
+        $channelTodayActiveMemberCount = Member::getActiveMemberCountByChannelId($channelInfo->id,$start_date_up,$end_date_up);
+        //$channelTodayActiveMemberCount = array('date'=>date("m.d"),'active_count'=>$channelTodayActiveMemberCount);
+
 
         $channelIosDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'ios',$dataOptionValue,$startDate,$endDate);          //苹果设备数
         $channelAndroidDeviceCount = Member::getDeviceCountByChannelId($channelInfo->id,'android',$dataOptionValue,$startDate,$endDate);  //安卓设备数
@@ -171,7 +178,7 @@ class UserController extends Controller
             'channelAvgConsumption' => sprintf("%.2f",$channelAvgConsumption)
         ];
 
-        $header = array('channelAllMemberCount'=>'累计用户','channelTodayMemberCount'=>'今日新增','channelTodayActiveMemberCount'=>'今日活跃','channelIosDeviceCount'=>'苹果设备数量','channelAndroidDeviceCount'=>'安卓设备数量','channelChargeCount'=>'充值数量','channelChargeAmount'=>'充值金额','channelChargeRate'=>'充值比例','channelAvgConsumption'=>'人均消费');
+        $header = array('channelAllMemberCount'=>'累计用户','channelTodayMemberCount'=>'今日新增','channelTodayActiveMemberCount'=>'今日活跃'.date("m.d"),'channelIosDeviceCount'=>'苹果设备数量','channelAndroidDeviceCount'=>'安卓设备数量','channelChargeCount'=>'充值数量','channelChargeAmount'=>'充值金额','channelChargeRate'=>'充值比例','channelAvgConsumption'=>'人均消费');
 
         exportExcelV2($data, $header, 'FirstPageStatistics','渠道统计报表');
     }

@@ -63,7 +63,12 @@ class TestController extends Controller
 
         $channelAllMemberCount = Member::getChannelMemberCount($channel_id);                         //累计用户
         $channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channel_id);              //今日新增用户
-        $channelTodayActiveMemberCount = Member::getTodayActiveMemberCountByChannelId($channel_id);  //今日活跃用户
+        //$channelTodayActiveMemberCount = Member::getTodayActiveMemberCountByChannelId($channel_id);  //今日活跃用户
+
+        //今日活跃用户
+        $start_date_up = date("Y-m-d");
+        $end_date_up = date("Y-m-d");
+        $channelTodayActiveMemberCount = Member::getActiveMemberCountByChannelId($channel_id,$start_date_up,$end_date_up);
 
         $channelIosDeviceCount = Member::getDeviceCountByChannelId($channel_id,'ios',$dataOptionValue,$startDate,$endDate);          //苹果设备数
         $channelAndroidDeviceCount = Member::getDeviceCountByChannelId($channel_id,'android',$dataOptionValue,$startDate,$endDate);  //安卓设备数
@@ -104,7 +109,7 @@ class TestController extends Controller
                     ]
                 ];
 
-        $header = array('channelAllMemberCount'=>'累计用户','channelTodayMemberCount'=>'今日新增','channelTodayActiveMemberCount'=>'今日活跃','channelIosDeviceCount'=>'苹果设备数量','channelAndroidDeviceCount'=>'安卓设备数量','channelChargeCount'=>'充值数量','channelChargeAmount'=>'充值金额','channelChargeRate'=>'充值比例','channelAvgConsumption'=>'人均消费');
+        $header = array('channelAllMemberCount'=>'累计用户','channelTodayMemberCount'=>'今日新增','channelTodayActiveMemberCount'=>'今日活跃'.date("m.d"),'channelIosDeviceCount'=>'苹果设备数量','channelAndroidDeviceCount'=>'安卓设备数量','channelChargeCount'=>'充值数量','channelChargeAmount'=>'充值金额','channelChargeRate'=>'充值比例','channelAvgConsumption'=>'人均消费');
 
         exportExcelV2($data, $header, '渠道统计报表','渠道统计报表');
     }
