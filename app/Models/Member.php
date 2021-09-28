@@ -35,32 +35,45 @@ class Member extends Model
 
 
     //新增用户
-    public static function getAddMemberCountByChannelId($channelId,$startDate,$endDate) {
+    public static function getAddMemberCountByChannelId($channelId,$dataOptionValue,$startDate,$endDate) {
         if ($channelId <= 0) return 0;
+
+        DB::connection()->enableQueryLog();
+        $query = self::query()->where('channel_id', $channelId);
+        if ($dataOptionValue) {
+            if($dataOptionValue == 1){   //今天
+                $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+                $endTime = strtotime(date('Y-m-d 23:59:59',time()));
+
+                $query->where([['create_time', '>=', $startTime],['create_time', '<=', $endTime]]);
+            }else if($dataOptionValue == 2){  //昨天
+                $startTime = strtotime(date('Y-m-d 00:00:00',strtotime("-1 day")));
+                $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
+
+                $query->where([['create_time', '>=', $startTime],['create_time', '<=', $endTime]]);
+            }
+        }
+
 
         if($startDate&&!$endDate){
             $startTime = strtotime("{$startDate} 00:00:00");
 
-            return self::query()->where('channel_id', $channelId)
-                ->where('create_time', '>=', $startTime)
+            return $query->where('create_time', '>=', $startTime)
                 ->count();
         }else if(!$startDate&&$endDate){
             $endTime = strtotime("{$endDate} 23:59:59");
 
-            return self::query()->where('channel_id', $channelId)
-                ->where('create_time', '<=', $endTime)
+            return $query->where('create_time', '<=', $endTime)
                 ->count();
         }else if($startDate&&$endDate){
             $startTime = strtotime("{$startDate} 00:00:00");
             $endTime = strtotime("{$endDate} 23:59:59");
 
-            return self::query()->where('channel_id', $channelId)
-                ->where('create_time', '>=', $startTime)
+            return $query->where('create_time', '>=', $startTime)
                 ->where('create_time', '<=', $endTime)
                 ->count();
         }else{
-            return self::query()->where('channel_id', $channelId)
-                ->count();
+            return $query->count();
         }
 
     }

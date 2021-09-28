@@ -41,7 +41,7 @@ class Channel extends Model
             throw new ServiceException("密码错误");
         }
 
-        Cache::forget('token:' . $channelInfo->token);
+        //Cache::forget('token:' . $channelInfo->token);
         //更新token，更新token过期时间
         $channelInfo->token           = self::generateToken($channelInfo->id);
         $channelInfo->token_expired   = time() + self::TOKEN_EXPIRED;

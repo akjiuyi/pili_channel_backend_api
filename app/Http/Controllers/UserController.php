@@ -42,7 +42,6 @@ class UserController extends Controller
 
         $lists = Member::getChannelUserLists($channelInfo->id, $dataOptionValue, $startDate, $endDate, $page, $pageSize);
 
-
         return $this->successJson($lists);
     }
 
@@ -57,7 +56,7 @@ class UserController extends Controller
 
         $channelAllMemberCount = Member::getChannelMemberCount($channelInfo->id);                               //累计用户
         //$channelTodayMemberCount = Member::getTodayMemberCountByChannelId($channelInfo->id);                  //今日新增用户
-        $channelAddMemberCount = Member::getAddMemberCountByChannelId($channelInfo->id,$startDate,$endDate);    //新增用户
+        $channelAddMemberCount = Member::getAddMemberCountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);    //新增用户
 
         //今日活跃用户
         $start_date_up = date("Y-m-d");
@@ -89,17 +88,13 @@ class UserController extends Controller
         $res = Member::getChargeCountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);
         //$channelChargeCount = $res['charge_times'];  //充值次数
         $channelChargeMemberCount = $res['charge_member_count']??0;  //充值人数
-        $channelChargeAmount = Member::getChargeAmountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);             //充值金额
+        $channelChargeAmount = Member::getChargeAmountByChannelId($channelInfo->id,$dataOptionValue,$startDate,$endDate);                     //充值金额
 
-        //$channeActiveMemberCount = Member::getChannelActiveMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);        //活跃人数
         $channeTotalMemberCount = $channelIosDeviceCount + $channelAndroidDeviceCount;
-
-        //$channelTotalMemberCount = Member::getChannelTotalMemberCount($channelInfo->id,$dataOptionValue,$startDate,$endDate);         //累计用户
         if($channeTotalMemberCount == 0){
             $channelChargeRate = 0;
         }else{
             $channelChargeRate = $channelChargeMemberCount/$channeTotalMemberCount;  //充值比例
-
         }
 
         if($channelChargeMemberCount == 0){
