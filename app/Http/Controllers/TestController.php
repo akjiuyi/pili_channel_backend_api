@@ -109,7 +109,7 @@ class TestController extends Controller
                     ]
                 ];
 
-        $header = array('channelAllMemberCount'=>'累计用户','channelTodayMemberCount'=>'今日新增','channelTodayActiveMemberCount'=>'今日活跃'.date("m.d"),'channelIosDeviceCount'=>'苹果设备数量','channelAndroidDeviceCount'=>'安卓设备数量','channelChargeCount'=>'充值数量','channelChargeAmount'=>'充值金额','channelChargeRate'=>'充值比例','channelAvgConsumption'=>'人均消费');
+        $header = array('channelAllMemberCount'=>'累计用户','channelTodayMemberCount'=>'今日新增'.date("m.d"),'channelTodayActiveMemberCount'=>'今日活跃'.date("m.d"),'channelIosDeviceCount'=>'苹果设备数量','channelAndroidDeviceCount'=>'安卓设备数量','channelChargeCount'=>'充值数量','channelChargeAmount'=>'充值金额','channelChargeRate'=>'充值比例','channelAvgConsumption'=>'人均消费');
 
         exportExcelV2($data, $header, '渠道统计报表','渠道统计报表');
     }

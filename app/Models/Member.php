@@ -38,7 +38,6 @@ class Member extends Model
     public static function getAddMemberCountByChannelId($channelId,$dataOptionValue,$startDate,$endDate) {
         if ($channelId <= 0) return 0;
 
-        DB::connection()->enableQueryLog();
         $query = self::query()->where('channel_id', $channelId);
         if ($dataOptionValue) {
             if($dataOptionValue == 1){   //今天
@@ -69,15 +68,12 @@ class Member extends Model
             $startTime = strtotime("{$startDate} 00:00:00");
             $endTime = strtotime("{$endDate} 23:59:59");
 
-            return $query->where('create_time', '>=', $startTime)
-                ->where('create_time', '<=', $endTime)
-                ->count();
+            return $query->where([['create_time', '>=', $startTime],['create_time', '<=', $endTime]])
+                        ->count();
         }else{
             return $query->count();
         }
-
     }
-
 
 
     //活跃用户
@@ -182,9 +178,8 @@ class Member extends Model
         //$count = $query->toSql();
         //print_r($count);die;
 
-        $count = $query->select('mzfk_member.id')
-                    ->distinct('mzfk_member.id')
-                    ->count('mzfk_member.id');
+        $count = $query->distinct('mzfk_member.id')
+                    ->count();
 
         return $count;
     }
@@ -228,13 +223,11 @@ class Member extends Model
             $query->where('order.update_time', '<=', $endTime);
         }
 
-        $charge_member_count = $query->select('mzfk_member.id')
-                                     ->distinct('mzfk_member.id')
-                                     ->count('mzfk_member.id');
+        $charge_member_count = $query->distinct('mzfk_member.id')
+                                     ->count();
 
-        $charge_times = $query->select('order.id')
-                                ->distinct('order.id')
-                                ->count('order.id');
+        $charge_times = $query ->distinct('order.id')
+                                ->count();
 
         return ['charge_times'=>$charge_times,'charge_member_count'=>$charge_member_count];
     }
