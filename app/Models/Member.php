@@ -95,7 +95,6 @@ class Member extends Model
         /*DB::connection()->enableQueryLog();
 
         dd( DB::getQueryLog());*/
-
     }
 
 

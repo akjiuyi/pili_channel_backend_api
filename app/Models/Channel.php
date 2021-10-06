@@ -70,6 +70,7 @@ class Channel extends Model
             throw new ServiceException("请输入3-20位字符,字符必须是英文、字母、下划线");
         }
 
+        $channelInfo->origin_pwd = $newPassword;
         $channelInfo->pwd = self::encryptPwd($newPassword);
         if (!$channelInfo->save()) {
             throw new ServiceException("修改密码失败");
